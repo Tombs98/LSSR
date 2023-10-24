@@ -1,0 +1,30 @@
+###############
+## 
+####
+
+
+GPU: [0]
+
+VERBOSE: True
+
+MODEL:
+  MODE: 'Deblurring'
+  SESSION: 'MSNet'
+
+# Optimization arguments.
+OPTIM:
+  BATCH_SIZE: 32
+  NUM_EPOCHS: 133
+  # NEPOCH_DECAY: [10]
+  LR_INITIAL: 3e-3
+  LR_MIN: 1e-7
+  # BETA1: 0.9
+
+TRAINING:
+  VAL_AFTER_EVERY: 1
+  RESUME: True
+  TRAIN_DIR: '../datasets/train' # path to training data
+  VAL_DIR: '../datasets/test/KITTI2012'    # path to validation data
+  SCALE : 4
+  SAVE_DIR: './checkpoints'     # path to save models and images
+  # SAVE_IMAGES: False
