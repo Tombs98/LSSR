@@ -117,8 +117,7 @@ val_loader3 = DataLoader(dataset=val_dataset3, batch_size=1, shuffle=False, num_
 val_dataset4 = get_validation_data('../datasets/test/Middlebury', scale)
 val_loader4 = DataLoader(dataset=val_dataset4, batch_size=1, shuffle=False, num_workers=16, drop_last=False, pin_memory=True)
 
-val_dataset5 = get_validation_data('f', scale)
-val_loader5 = DataLoader(dataset=val_dataset5, batch_size=1, shuffle=False, num_workers=16, drop_last=False, pin_memory=True)
+
 
 print('===> Start Epoch {} End Epoch {}'.format(start_epoch,opt.OPTIM.NUM_EPOCHS + 1))
 print('===> Loading datasets')
