@@ -8,13 +8,13 @@ GPU: [0]
 VERBOSE: True
 
 MODEL:
-  MODE: 'Deblurring'
-  SESSION: 'MSNet'
+  MODE: 'stereoSR'
+  SESSION: 'LSSR'
 
 # Optimization arguments.
 OPTIM:
   BATCH_SIZE: 32
-  NUM_EPOCHS: 133
+  NUM_EPOCHS: 100000000000000000
   # NEPOCH_DECAY: [10]
   LR_INITIAL: 3e-3
   LR_MIN: 1e-7
