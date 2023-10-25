@@ -17,11 +17,8 @@ def main():
     file_path = os.path.join('newfo_v/4x1', 'KITTI2015')
     gt_path = os.path.join('../datasets/test', 'KITTI2015/hr')
     file_list = os.listdir(gt_path)
-    # print(file_list)
 
-    # path_fake = natsorted(glob(os.path.join(file_path, '*.png')) + glob(os.path.join(file_path, '*.jpg')))
-    # path_real = natsorted(glob(os.path.join(gt_path, '*.png')) + glob(os.path.join(gt_path, '*.jpg')))
-    # print(len(path_fake))
+
     list_psnr = []
     list_psnr_l = []
     list_ssim_l = []
@@ -32,10 +29,7 @@ def main():
 
         l0 = read_img(file_path+'/'+file_list[i]+'/hr0.png')
         l1 = read_img(file_path+'/'+file_list[i]+'/hr1.png')
-        #result1 = np.zeros(t1.shape,dtype=np.float32)
-        #result2 = np.zeros(t2.shape,dtype=np.float32)
-        #cv2.normalize(t1,result1,alpha=0,beta=1,norm_type=cv2.NORM_MINMAX,dtype=cv2.CV_32F)
-        #cv2.normalize(t2,result2,alpha=0,beta=1,norm_type=cv2.NORM_MINMAX,dtype=cv2.CV_32F)
+
        
 
         
