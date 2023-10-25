@@ -5,18 +5,12 @@ def get_training_data(rgb_dir, scale_factor):
     assert os.path.exists(rgb_dir)
     return TrainSetLoader(rgb_dir, scale_factor)
 
-def get_training_data2(rgb_dir, scale_factor):
-    assert os.path.exists(rgb_dir)
-    return TrainSetLoader2(rgb_dir, scale_factor)
 
 
 def get_validation_data(rgb_dir, scale_factor):
     assert os.path.exists(rgb_dir)
     return ValSetLoader(rgb_dir, scale_factor)
 
-def get_validation_data2(rgb_dir, scale_factor):
-    assert os.path.exists(rgb_dir)
-    return ValSetLoader2(rgb_dir, scale_factor)
 
 def debu():
     from config import Config
