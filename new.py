@@ -13,10 +13,10 @@ class SimpleGate(nn.Module):
         x1, x2 = x.chunk(2, dim=1)
         return x1 * x2
 
-## Combination Coefficient
-class CC(nn.Module):
+## reweight
+class RWBlock(nn.Module):
     def __init__(self, channel, reduction=16):
-        super(CC, self).__init__()
+        super(RWBlock, self).__init__()
         self.avg_pool = nn.AdaptiveAvgPool2d(1)
         self.conv_mean = nn.Sequential(
                 nn.Conv2d(channel, channel // reduction, 1, padding=0, bias=True),
@@ -104,39 +104,24 @@ class NAFBlock(nn.Module):
 
         return y + x * self.gamma
 
-class LatticeBlock(nn.Module):   
+class LSNB(nn.Module):   
     def __init__(self, c, DW_Expand=2, drop_out_rate=0.):
         super().__init__()
 
         dw_channel = c * DW_Expand
 
-        # block_0 = []
-        # block_0.append(LayerNorm2d(c))
-        # block_0.append(nn.Conv2d(in_channels=c, out_channels=dw_channel, kernel_size=1, padding=0, stride=1, groups=1, bias=True))
-        # block_0.append(nn.Conv2d(in_channels=dw_channel, out_channels=dw_channel, kernel_size=3, padding=1, stride=1, groups=dw_channel,
-        #                        bias=True))
-        # block_0.append(SimpleGate())
-        # block_0.append(nn.AdaptiveAvgPool2d(1))
-        # block_0.append(nn.Conv2d(in_channels=dw_channel // 2, out_channels=dw_channel // 2, kernel_size=1, padding=0, stride=1,
-        #               groups=1, bias=True))
-        # block_0.append(nn.Conv2d(in_channels=dw_channel // 2, out_channels=c, kernel_size=1, padding=0, stride=1, groups=1, bias=True))
 
         self.conv_block0 = NAFBlock(c)
 
-        self.fea_ca1 = CC(c)
-        self.x_ca1 = CC(c)
+        self.fea_ca1 = RWBlock(c)
+        self.x_ca1 = RWBlock(c)
         
-        # block_1 = []
-        # block_1.append(LayerNorm2d(c))
-        # block_1.append(nn.Conv2d(in_channels=c, out_channels=dw_channel, kernel_size=1, padding=0, stride=1, groups=1, bias=True))
-        # block_1.append(SimpleGate())
-        # block_1.append(nn.Conv2d(in_channels=dw_channel // 2, out_channels=c, kernel_size=1, padding=0, stride=1, groups=1, bias=True))
 
         self.conv_block1 = NAFBlock(c)
         
 
-        self.fea_ca2 = CC(c)
-        self.x_ca2 = CC(c)
+        self.fea_ca2 = RWBlock(c)
+        self.x_ca2 = RWBlock(c)
 
         self.compress = nn.Conv2d(2 * c, c, kernel_size=1, padding=0, bias=True)
 
@@ -162,57 +147,9 @@ class LatticeBlock(nn.Module):
 
         return out
     
-class LatticeBlock2(nn.Module):
-    def __init__(self, nFeat):
-        super(LatticeBlock2, self).__init__()
 
+class LSAM(nn.Module):
     
-        block_0 = []
-        block_0.append(nn.Conv2d(nFeat, nFeat, 3, 1, 1, groups=4, bias=True))
-        block_0.append(nn.LeakyReLU(0.1, inplace=True))
-        block_0.append(nn.Conv2d(nFeat, nFeat, 3, 1, 1, groups=4, bias=True))
-        self.conv_block0 = nn.Sequential(*block_0)
-
-        self.fea_ca1 = CC(nFeat)
-        self.x_ca1 = CC(nFeat)
-
-        block_1 = []
-        block_1.append(nn.Conv2d(nFeat, nFeat, 3, 1, 1, groups=4, bias=True))
-        block_1.append(nn.LeakyReLU(0.1, inplace=True))
-        block_1.append(nn.Conv2d(nFeat, nFeat, 3, 1, 1, groups=4, bias=True))
-        self.conv_block1 = nn.Sequential(*block_1)
-
-        self.fea_ca2 = CC(nFeat)
-        self.x_ca2 = CC(nFeat)
-
-        self.compress = nn.Conv2d(2 * nFeat, nFeat, kernel_size=1, padding=0, bias=True)
-
-    def forward(self, x):
-        # analyse unit
-        x_feature_shot = self.conv_block0(x)
-        fea_ca1 = self.fea_ca1(x_feature_shot)
-        x_ca1 = self.x_ca1(x)
-
-        p1z = x + fea_ca1 * x_feature_shot
-        q1z = x_feature_shot + x_ca1 * x
-
-        # synthes_unit
-        x_feat_long = self.conv_block1(p1z)
-        fea_ca2 = self.fea_ca2(q1z)
-        p3z = x_feat_long + fea_ca2 * q1z
-        x_ca2 = self.x_ca2(x_feat_long)
-        q3z = q1z + x_ca2 * x_feat_long
-
-        out = torch.cat((p3z, q3z), 1)
-        out = self.compress(out)
-
-        return out
- 
-
-class SCAM(nn.Module):
-    '''
-    Stereo Cross Attention Module (SCAM)
-    '''
     def __init__(self, c):
         super().__init__()
         self.scale = c ** -0.5
@@ -220,13 +157,13 @@ class SCAM(nn.Module):
         self.norm_l = LayerNorm2d(c)
         self.norm_r = LayerNorm2d(c)
 
-        self.lb1 = LatticeBlock(c)
+        self.lb1 = LSNB(c)
         self.l_proj1 = nn.Conv2d(c, c, kernel_size=1, stride=1, padding=0)
         self.r_proj1 = nn.Conv2d(c, c, kernel_size=1, stride=1, padding=0)
         
         self.beta = nn.Parameter(torch.zeros((1, c, 1, 1)), requires_grad=True)
         self.gamma = nn.Parameter(torch.zeros((1, c, 1, 1)), requires_grad=True)
-        self.lb2 = LatticeBlock(c)
+        self.lb2 = LSNB(c)
         self.l_proj2 = nn.Conv2d(c, c, kernel_size=1, stride=1, padding=0)
         self.r_proj2 = nn.Conv2d(c, c, kernel_size=1, stride=1, padding=0)
 
@@ -259,8 +196,8 @@ class SCAM(nn.Module):
 class St(nn.Module):
     def __init__(self, c, drop_out_rate=0., fusion=False):
         super().__init__()
-        self.blk = LatticeBlock(c, drop_out_rate=drop_out_rate)
-        self.fusion = SCAM(c) if fusion else None
+        self.blk = LSNB(c, drop_out_rate=drop_out_rate)
+        self.fusion = LSAM(c) if fusion else None
 
     def forward(self, *feats):
         feats = tuple([self.blk(x) for x in feats])
