@@ -225,10 +225,8 @@ class DropPath(nn.Module):
 
 
 
-class NAFNetSR(nn.Module):
-    '''
-    NAFNet for Super-Resolution
-    '''
+class LSSR(nn.Module):
+
     def __init__(self, up_scale=4, width=48, num_blks=8, img_channel=3, drop_path_rate=0., drop_out_rate=0.,fusion_from=-1, fusion_to=1000, dual=True):
         super().__init__()
         self.dual = dual    # dual input for stereo SR (left view, right view)
@@ -362,10 +360,10 @@ class Local_Base():
             self.forward(imgs)
 
 
-class NAFSSR(Local_Base, NAFNetSR):
+class NAFSSR(Local_Base, LSSR):
     def __init__(self, *args, train_size=(1, 6, 30, 90), fast_imp=False, fusion_from=-1, fusion_to=1000, **kwargs):
         Local_Base.__init__(self)
-        NAFNetSR.__init__(self, *args, img_channel=3, fusion_from=fusion_from, fusion_to=fusion_to, dual=True, **kwargs)
+        LSSR.__init__(self, *args, img_channel=3, fusion_from=fusion_from, fusion_to=fusion_to, dual=True, **kwargs)
 
         N, C, H, W = train_size
         base_size = (int(H * 1.5), int(W * 1.5))
@@ -376,7 +374,7 @@ class NAFSSR(Local_Base, NAFNetSR):
 
 
 if __name__ == "__main__":
-    net = NAFNetSR()
+    net = LSSR()
     x1 =  torch.randn((1, 3, 30, 90))
     x2 =  torch.randn((1, 3, 30, 90))
     x = torch.cat((x1,x2),dim=1)
