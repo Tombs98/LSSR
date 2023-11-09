@@ -29,8 +29,7 @@ from warmup_scheduler import GradualWarmupScheduler
 from tqdm import tqdm
 from pdb import set_trace as stx
 from torchstat import  stat
-#from naf import NAFNet
-from new import NAFNetSR, NAFSSR
+from new import LSSR, NAFSSR
 
 
 dir_checkpoint = Path('./new_res4x_48_81/')
