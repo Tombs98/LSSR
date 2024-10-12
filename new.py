@@ -18,35 +18,12 @@ class RWBlock(nn.Module):
     def __init__(self, channel, reduction=16):
         super(RWBlock, self).__init__()
         self.avg_pool = nn.AdaptiveAvgPool2d(1)
-        self.conv_mean = nn.Sequential(
-                nn.Conv2d(channel, channel // reduction, 1, padding=0, bias=True),
-                nn.ReLU(inplace=True),
-                nn.Conv2d(channel // reduction, channel, 1, padding=0, bias=True),
-                nn.Sigmoid()
-        )
-        self.conv_std = nn.Sequential(
-                nn.Conv2d(channel, channel // reduction, 1, padding=0, bias=True),
-                nn.ReLU(inplace=True),
-                nn.Conv2d(channel // reduction, channel, 1, padding=0, bias=True),
-                nn.Sigmoid()
-        )
+       
 
     def forward(self, x):
 
-        # mean
-        ca_mean = self.avg_pool(x)
-        ca_mean = self.conv_mean(ca_mean)
-
-        # std
-        m_batchsize, C, height, width = x.size()
-        x_dense = x.view(m_batchsize, C, -1)
-        ca_std = torch.std(x_dense, dim=2, keepdim=True)
-        ca_std = ca_std.view(m_batchsize, C, 1, 1)
-        ca_var = self.conv_std(ca_std)
-
-
-        cc = (ca_mean + ca_var)/2.0
-        return cc
+       
+        return rx
     
 
 class NAFBlock(nn.Module):
